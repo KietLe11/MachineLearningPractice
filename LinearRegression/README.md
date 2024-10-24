@@ -1,0 +1,1 @@
+Based off of Lab 2: Linear Regression from [MLF] H. Jiang, "Machine Learning Fundamentals: A Concise Introduction", Cambridge University Press, 2021. (bibtex)
