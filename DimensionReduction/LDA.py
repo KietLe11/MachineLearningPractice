@@ -28,9 +28,32 @@ if __name__ == "__main__":
     # load images of '1', '3', '6', '9'
     target_digits = [1, 3, 6, 9]
     digit_index = np.isin(train_label, target_digits)
+    print(digit_index)
 
     X = train_data[digit_index]
     print(X.shape)
 
-    # Find class means
-    print(X[:10])
+    # Find mean of feature of every class
+    mean_everything = np.mean(X, axis=0)
+    print(mean_everything.shape)
+
+    # Find mean and size of every class
+    class_means = []
+    class_sizes = []
+    for c in target_digits:
+        print(f'Finding mean of {c}')
+        class_digit_index = (train_label == c) # filter the class index
+        target_class = train_data[class_digit_index] # filter the class
+        print(target_class)
+
+        class_means.append(np.mean(target_class)) # add mean to list
+        c_size = target_class.shape[0]
+        class_sizes.append(c_size)
+
+    print(class_means)
+    print(class_sizes)
+    # Calculate Between-Class scatter matrix
+    S_b = ''
+    for i in range(target_digits):
+        S_b += class_sizes[i] * (class_means[i] - mean_everything) @ (class_means[i] - mean_everything).T
+        print(S_b.shape)
