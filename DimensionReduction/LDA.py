@@ -38,22 +38,44 @@ if __name__ == "__main__":
     print(mean_everything.shape)
 
     # Find mean and size of every class
-    class_means = []
-    class_sizes = []
+    class_means = {}
+    class_sizes = {}
     for c in target_digits:
         print(f'Finding mean of {c}')
         class_digit_index = (train_label == c) # filter the class index
         target_class = train_data[class_digit_index] # filter the class
-        print(target_class)
 
-        class_means.append(np.mean(target_class)) # add mean to list
+        class_means[c] = np.mean(target_class, axis=0) # add mean to list
         c_size = target_class.shape[0]
-        class_sizes.append(c_size)
+        class_sizes[c] = c_size
 
-    print(class_means)
-    print(class_sizes)
     # Calculate Between-Class scatter matrix
-    S_b = ''
-    for i in range(target_digits):
-        S_b += class_sizes[i] * (class_means[i] - mean_everything) @ (class_means[i] - mean_everything).T
+    matrix_shape = class_means[target_digits[0]].reshape(-1, 1).shape[0]
+    S_b = np.zeros((matrix_shape, matrix_shape))
+    for c in target_digits:
+        diff = (class_means[c] - mean_everything).reshape(-1, 1)
+        S_b += class_sizes[c] * (diff @ diff.T)
         print(S_b.shape)
+
+    # Calculate Within-Class scatter matrix
+    S_w = np.zeros((matrix_shape, matrix_shape)) # Within-CLass Scatter Matrix
+    for c in target_digits:
+        print(f'Calculating Within-Class scatter matrix of {c}')
+        class_digit_index = (train_label == c) # filter the class index
+        target_class = train_data[class_digit_index] # filter the class
+        print(f'Target class shape is: {target_class.shape}')
+
+        S_k = np.zeros((matrix_shape, matrix_shape)) #Scatter matrix for class c
+        for sample in target_class:
+            diff = (sample - class_means[c]).reshape(-1,1)
+            S_k += (diff @ diff.T)
+
+        S_w += S_k
+
+    # Calculate Eigenvectors and Eigenvalues that maximize the between-class scatter,
+    # whilst trying to minimize within-class scatter
+    S_wb = np.linalg.inv(S_w) @ S_b
+    eigenvalues, eigenvectors = np.linalg.eig(S_wb)
+
+    print(eigenvalues)
+    print(eigenvectors)
