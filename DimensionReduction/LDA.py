@@ -1,5 +1,8 @@
 from mnist import MNIST
 import numpy as np
+import matplotlib
+matplotlib.use('TkAgg')
+import matplotlib.pyplot as plt
 
 def my_LDA(X):
     """
@@ -77,5 +80,19 @@ if __name__ == "__main__":
     S_wb = np.linalg.inv(S_w) @ S_b
     eigenvalues, eigenvectors = np.linalg.eig(S_wb)
 
+    print(eigenvalues.shape)
+    print(eigenvectors.shape)
+
+    # Sort eigenvalues and eigenvectors by eigenvalue in descending order
+    sorted_indices = np.argsort(eigenvalues)[::-1]
+    eigenvalues = eigenvalues[sorted_indices]
+    eigenvectors = eigenvectors[:, sorted_indices]
+
+    # Select the top eigenvectors (up to c-1 dimensions for c classes)
+    W = eigenvectors[:, :3]
+
     print(eigenvalues)
-    print(eigenvectors)
+
+    plt.title('all eigenvalues from largest to smallest')
+    plt.plot(eigenvalues, 'rd--')
+    plt.show()
